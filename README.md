@@ -2,7 +2,7 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=170&section=header&text=Hazza%20Bike&fontSize=56&fontColor=ffffff&animation=twinkling&fontAlignY=38&desc=Digital%20Twin%20Pengelolaan%20Penyewaan%20Sepeda&descAlignY=60&descSize=18" alt="header" width="100%"/>
 
-<img src="assets/bike-banner.svg" alt="Hazza Bike animated banner" width="100%"/>
+<img src="bike-banner.svg" alt="Hazza Bike animated banner" width="100%"/>
 
 <a href="https://git.io/typing-svg">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pause=1000&color=FF6FA5&center=true&vCenter=true&width=620&lines=Halo!+Selamat+datang+di+Hazza+Bike+🚲;Sewa+sepeda+jadi+lebih+rapi+✨;Status+%26+kondisi+sepeda+real-time+di+dashboard+💖;Dibuat+dengan+Vue.js+%2B+Express.js+💚" alt="Typing SVG" />
