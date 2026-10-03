@@ -101,8 +101,8 @@ Proyek ini membangun sistem **Digital Twin berbasis web** yang merepresentasikan
 | Nama | Peran |
 |---|---|
 | **Darma** | Project Manager |
-| **Hilda Natasya** | System Analyst |
-| **Difana Syakila** | UI/UX Designer |
+| **Hilda Natasya** | Developer |
+| **Difana Syakila** | Developer |
 | **Aulia Yudistira** | Developer |
 
 **Dosen / Supervisor:** Ibu Cut Alna Fadillah
