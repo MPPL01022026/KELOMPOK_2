@@ -30,6 +30,7 @@
 - [Arsitektur Sistem](#-arsitektur-sistem)
 - [Diagram](#-diagram)
 - [WBS & Jadwal](#-wbs--jadwal)
+- [Status & Progres Pengembangan Sistem](#-status--progres-pengembangan-sistem)
 - [Estimasi Function Point](#-estimasi-function-point)
 - [Tech Stack](#-tech-stack)
 - [Struktur Folder](#-struktur-folder)
@@ -377,6 +378,26 @@ gantt
 ```
 
 ---
+
+## 📊 Status & Progres Pengembangan Sistem
+
+Dokumentasi ini disinkronkan langsung dengan *roadmap* pengerjaan tim. Berikut adalah status pengerjaan fitur berdasarkan linimasa proyek:
+
+### 🗺️ Target & Linimasa Pengerjaan (Milestones)
+
+* **✅ Tahap 1: Inisiasi & Analisis Awal (Selesai)**
+  * Penentuan UMKM Mitra, Survey Lapangan, serta Pembuatan WBS, DFD, & ERD.
+* **⏳ Tahap 2: Perancangan & Desain (Sedang Berjalan)**
+  * Desain Database MySQL *(Selesai)*.
+  * Desain UI/UX & Wireframe Vue.js *(In Progress)*.
+* **📅 Tahap 3: Pengembangan Backend Express.js (Akan Datang)**
+  * Setup Proyek & Koneksi database MySQL.
+  * Pembuatan REST API untuk Autentikasi menggunakan JWT.
+  * Pembuatan API Manajemen Sepeda, Transaksi, dan Fitur Digital Twin.
+* **📅 Tahap 4: Pengembangan Frontend Vue.js (Akan Datang)**
+  * Setup Proyek Vue 3, Pembuatan Halaman Autentikasi, Transaksi, dan Dashboard Interaktif.
+* **📅 Tahap 5: Integrasi, Testing, & Finalisasi (Akan Datang)**
+  * Menghubungkan Frontend & Backend, Bug Fixing, serta Deployment Sistem.
 
 ## 📐 Estimasi Function Point
 
