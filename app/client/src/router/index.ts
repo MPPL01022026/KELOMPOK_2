@@ -3,6 +3,7 @@ import UserLayout from '@/modules/UserArea/index.vue'
 import Home from '@/modules/UserArea/Home.vue'
 import Login from '@/modules/AdminArea/Login/Login.vue'
 import Template from '@/modules/AdminArea/Templating/Template.vue'
+import Tentang from '../modules/UserArea/Tentang.vue';
 
 const routes = [
   {
@@ -10,6 +11,7 @@ const routes = [
     component: UserLayout,
     children: [
       { path: '', component: Home },
+      { path: 'tentang', component: () => import('../modules/UserArea/Tentang.vue') },
     ],
   },
 
