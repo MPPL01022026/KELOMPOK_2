@@ -1,18 +1,13 @@
 <template>
-  <div class="flex h-screen bg-gray-100 overflow-hidden">
-    <!-- Sidebar -->
+  <div class="flex h-screen overflow-hidden bg-slate-100">
     <Sidebar :isOpen="sidebarOpen" @toggle="toggleSidebar" @navigate="handleNavigation" />
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Navbar -->
+    <div class="flex flex-1 flex-col overflow-hidden">
       <Navbar
         :sidebarOpen="sidebarOpen"
         @toggleSidebar="toggleSidebar"
         :currentPage="currentPage"
       />
-
-      <!-- Content -->
       <Content :currentPage="currentPage" />
     </div>
   </div>

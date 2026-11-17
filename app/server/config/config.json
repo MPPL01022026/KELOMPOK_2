@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "tamsar27",
+    "database": "hazza_bike",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

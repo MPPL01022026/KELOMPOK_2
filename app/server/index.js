@@ -1,62 +1,65 @@
 const express = require("express");
-const app = express();
-const PORT = 3001;
 const cors = require("cors");
-app.use(cors());
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 // Impor instance sequelize dari models
 const { sequelize } = require("./models");
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Definisikan router yang ingin diimpor secara dinamis
+// Router yang diimpor secara dinamis. Tambahkan nama baru di sini bila perlu.
 const arr_router = [
-  "chat",
-  "user",
   "auth",
-  "event",
-  "galeri_user",
-  "news_user",
-  "galeri_admin",
-]; // Kamu tinggal menambah router baru di sini
+  "sepeda",
+  "pelanggan",
+  "penyewaan",
+  "pengembalian",
+  "riwayat",
+  "dashboard",
+];
 
-// Inisialisasi objek untuk menampung semua router
-let arr = {};
-
-// Loop melalui nama router dan secara dinamis mengimpor router
-arr_router.forEach((e) => {
-  // Misalnya kamu menambahkan file router dengan nama `router_chat.js` atau `router_user.js`
-  arr[`${e}`] = require(`./router/router_${e}`);
+const routers = {};
+arr_router.forEach((name) => {
+  routers[name] = require(`./router/router_${name}`);
 });
 
-// Daftarkan semua router secara dinamis dengan path yang sesuai
-Object.keys(arr).forEach((routerKey) => {
-  // Ubah ke path yang sesuai
-  app.use("/", arr[routerKey]); // Jangan ada "/chat" lagi
+Object.keys(routers).forEach((routerKey) => {
+  app.use("/", routers[routerKey]);
 });
 
-// Autentikasi dengan database dan mulai server
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("✅ MySQL connected!");
+async function bootstrap() {
+  await sequelize.authenticate();
+  console.log("MySQL connected!");
 
-    sequelize
-      .sync({ force: false }) // force: false agar tidak menghapus tabel yang sudah ada
-      .then(() => {
-        console.log("✅ Tabel sudah disinkronkan!");
+  await sequelize.sync({ force: false });
+  console.log("Tabel sudah disinkronkan!");
 
-        // Setelah sinkronisasi selesai, jalankan server
-        app.listen(PORT, () => {
-          console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
-        });
-      })
-      .catch((err) => {
-        console.error("❌ Error sinkronisasi tabel:", err);
-      });
-  })
-  .catch((err) => {
-    console.error("❌ MySQL connection error:", err);
+  const { Admin } = require("./models");
+  const [admin, created] = await Admin.findOrCreate({
+    where: { username: "admin" },
+    defaults: {
+      name: "Admin Hazza Bike",
+      username: "admin",
+      password: await bcrypt.hash("admin", 10),
+    },
   });
+
+  if (created) {
+    console.log("Akun admin default dibuat (username: admin, password: admin)");
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Server berjalan di http://localhost:${PORT}`);
+  });
+}
+
+bootstrap().catch((err) => {
+  console.error("Error saat bootstrap server:", err);
+});

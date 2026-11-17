@@ -1,355 +1,163 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-6">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="mb-8">
-        <p class="text-gray-600 mt-2">Selamat datang di panel admin aplikasi Tamsar</p>
-      </div>
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-lg font-bold text-slate-900">Digital Twin Armada</h2>
+      <p class="text-sm text-slate-500">Ringkasan status dan kondisi sepeda Hazza Bike.</p>
+    </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div v-for="stat in statsCards" :key="stat.title" class="bg-white rounded-lg shadow p-6">
+    <div v-if="loading" class="flex justify-center py-12">
+      <LoadingSpinner label="Memuat dashboard..." />
+    </div>
+
+    <template v-else-if="summary">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
           <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-500 text-sm">{{ stat.title }}</p>
-              <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ stat.value }}</h3>
-              <span class="text-green-500 text-sm mt-2 inline-block"
-                >{{ stat.change }} dari bulan lalu</span
-              >
-            </div>
-            <div :class="stat.color" class="rounded-full p-3">
-              <component :is="stat.icon" class="w-6 h-6 text-white" />
-            </div>
+            <p class="text-sm font-medium text-slate-500">Total Sepeda</p>
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+              <Bike class="h-5 w-5" />
+            </span>
           </div>
+          <p class="mt-3 text-3xl font-bold text-slate-900">{{ summary.sepeda.total }}</p>
+        </div>
+        <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-emerald-700">Tersedia</p>
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <CheckCircle2 class="h-5 w-5" />
+            </span>
+          </div>
+          <p class="mt-3 text-3xl font-bold text-emerald-700">{{ summary.sepeda.tersedia }}</p>
+        </div>
+        <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-amber-700">Disewa</p>
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+              <Clock class="h-5 w-5" />
+            </span>
+          </div>
+          <p class="mt-3 text-3xl font-bold text-amber-700">{{ summary.sepeda.disewa }}</p>
+        </div>
+        <div class="rounded-2xl border border-red-100 bg-red-50 p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-red-700">Tidak Tersedia</p>
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100 text-red-600">
+              <XCircle class="h-5 w-5" />
+            </span>
+          </div>
+          <p class="mt-3 text-3xl font-bold text-red-700">{{ summary.sepeda.tidak_tersedia }}</p>
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="mb-6">
-        <div class="border-b border-gray-200">
-          <nav class="-mb-px flex space-x-8">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              @click="activeTab = tab.id"
-              :class="[
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
-              ]"
-            >
-              {{ tab.name }}
-            </button>
-          </nav>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+              <CheckCircle2 class="h-5 w-5" />
+            </span>
+            <p class="text-sm font-medium text-slate-500">Kondisi Baik</p>
+          </div>
+          <p class="mt-3 text-2xl font-bold text-slate-900">{{ summary.kondisi.baik }}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+              <Wrench class="h-5 w-5" />
+            </span>
+            <p class="text-sm font-medium text-slate-500">Perlu Perawatan</p>
+          </div>
+          <p class="mt-3 text-2xl font-bold text-slate-900">{{ summary.kondisi.perlu_perawatan }}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-600">
+              <XCircle class="h-5 w-5" />
+            </span>
+            <p class="text-sm font-medium text-slate-500">Rusak</p>
+          </div>
+          <p class="mt-3 text-2xl font-bold text-slate-900">{{ summary.kondisi.rusak }}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
+              <Users class="h-5 w-5" />
+            </span>
+            <p class="text-sm font-medium text-slate-500">Pelanggan</p>
+          </div>
+          <p class="mt-3 text-2xl font-bold text-slate-900">{{ summary.pelanggan }}</p>
         </div>
       </div>
 
-      <!-- Content berdasarkan tab aktif -->
-      <div v-if="activeTab === 'berita'" class="bg-white rounded-lg shadow">
-        <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-800">Berita Terbaru</h2>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h3 class="font-semibold text-slate-900">Sewa Berjalan</h3>
+        <div v-if="activeRentals.length === 0" class="mt-3 text-sm text-slate-500">
+          Tidak ada sewa yang sedang berjalan.
         </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <div v-else class="mt-3 overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Judul
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Kategori
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Tanggal
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Views
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Status
-                </th>
+                <th class="py-2 pr-4">ID</th>
+                <th class="py-2 pr-4">Sepeda</th>
+                <th class="py-2 pr-4">Pelanggan</th>
+                <th class="py-2 pr-4">Batas Waktu</th>
+                <th class="py-2">Tarif</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="news in recentNews" :key="news.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ news.title }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ news.category }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ news.date }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ news.views }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    :class="
-                      news.status === 'Published'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    "
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  >
-                    {{ news.status }}
-                  </span>
-                </td>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="r in activeRentals" :key="r.id_penyewaan" class="hover:bg-slate-50">
+                <td class="py-2 pr-4 font-semibold text-slate-900">{{ r.id_penyewaan }}</td>
+                <td class="py-2 pr-4">{{ r.sepeda?.nama_sepeda }}</td>
+                <td class="py-2 pr-4">{{ r.pelanggan?.nama }}</td>
+                <td class="py-2 pr-4">{{ formatDateTime(r.batas_waktu) }}</td>
+                <td class="py-2">{{ formatRupiah(r.tarif) }}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+    </template>
 
-      <div v-else-if="activeTab === 'galeri'" class="bg-white rounded-lg shadow">
-        <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-800">Galeri Foto</h2>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
-          <div v-for="photo in galleryPhotos" :key="photo.id" class="relative group cursor-pointer">
-            <div class="aspect-square bg-gray-200 rounded-lg overflow-hidden">
-              <div class="w-full h-full flex items-center justify-center text-gray-400">
-                <component :is="photo.icon" class="w-12 h-12" />
-              </div>
-            </div>
-            <div
-              class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center"
-            >
-              <div class="opacity-0 group-hover:opacity-100 text-white text-center">
-                <p class="text-sm font-medium">{{ photo.title }}</p>
-                <p class="text-xs">{{ photo.likes }} likes</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-else-if="activeTab === 'event'" class="bg-white rounded-lg shadow">
-        <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-800">Event Mendatang</h2>
-        </div>
-        <div class="p-6">
-          <div
-            v-for="event in upcomingEvents"
-            :key="event.id"
-            class="border-l-4 border-blue-500 pl-4 py-4 mb-4 hover:bg-gray-50"
-          >
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800">{{ event.title }}</h3>
-                <p class="text-sm text-gray-600 mt-1">{{ event.description }}</p>
-                <div class="flex items-center gap-4 mt-2">
-                  <span class="text-xs text-gray-500">📅 {{ event.date }}</span>
-                  <span class="text-xs text-gray-500">📍 {{ event.location }}</span>
-                  <span class="text-xs text-gray-500">👥 {{ event.participants }} peserta</span>
-                </div>
-              </div>
-              <span
-                :class="
-                  event.type === 'Online'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-purple-100 text-purple-800'
-                "
-                class="px-3 py-1 text-xs font-semibold rounded-full"
-              >
-                {{ event.type }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Chart placeholder -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">Statistik Pengunjung</h3>
-          <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
-            <p class="text-gray-400">Chart akan ditampilkan di sini</p>
-          </div>
-        </div>
-
-        <!-- Activity feed -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
-          <div class="space-y-4">
-            <div
-              v-for="activity in recentActivities"
-              :key="activity.id"
-              class="flex items-start gap-3"
-            >
-              <div :class="activity.color" class="rounded-full p-2 mt-1">
-                <component :is="activity.icon" class="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <p class="text-sm text-gray-800">{{ activity.text }}</p>
-                <p class="text-xs text-gray-500">{{ activity.time }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Notification
+      :show-notification="showNotification"
+      :notification-type="notificationType"
+      :notification-message="notificationMessage"
+      @close="hideNotification"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import {
-  Image,
-  Calendar,
-  Users,
-  FileText,
-  TrendingUp,
-  Eye,
-  Heart,
-  MessageSquare,
-} from 'lucide-vue-next'
+import { onMounted, ref } from 'vue'
+import { Bike, CheckCircle2, Clock, Users, Wrench, XCircle } from 'lucide-vue-next'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import Notification from '@/components/Modal/Notification.vue'
+import { useNotification } from '@/composables/useNotification'
+import { getDashboard, getPenyewaan } from '@/service/hazza'
 
-import { getAllEvents } from '@/service/event'
+const summary = ref<any | null>(null)
+const activeRentals = ref<any[]>([])
+const loading = ref(false)
 
-// ============================
-// NAVIGATION
-// ============================
-const activeTab = ref('overview')
+const { showNotification, notificationType, notificationMessage, displayNotification, hideNotification } = useNotification()
 
-const tabs = [
-  { id: 'overview', name: 'Overview' },
-  { id: 'berita', name: 'Berita' },
-  { id: 'galeri', name: 'Galeri' },
-  { id: 'event', name: 'Event' },
-]
-
-// ============================
-// STATIC DUMMY DATA
-// ============================
-const statsCards = reactive([
-  {
-    title: 'Total Galeri',
-    value: '156',
-    icon: Image,
-    color: 'bg-blue-500',
-    change: '+12%',
-  },
-  {
-    title: 'Total Berita',
-    value: '89',
-    icon: FileText,
-    color: 'bg-green-500',
-    change: '+8%',
-  },
-  {
-    title: 'Event Aktif',
-    value: '24',
-    icon: Calendar,
-    color: 'bg-purple-500',
-    change: '+5%',
-  },
-  {
-    title: 'Total Pengunjung',
-    value: '12.5K',
-    icon: Users,
-    color: 'bg-orange-500',
-    change: '+23%',
-  },
-])
-
-// ============================
-// EVENT FROM API
-// ============================
-const upcomingEvents = ref([])
-
-const fetchEvents = async () => {
+const fetchData = async () => {
+  loading.value = true
   try {
-    const events = await getAllEvents()
-
-    // mapping ke bentuk yang sesuai templatenya
-    upcomingEvents.value = events.map((ev: any) => ({
-      id: ev.id,
-      title: ev.name,
-      description: ev.deskripsi,
-      date: ev.event_date,
-      location: ev.lokasi,
-      participants: 0, // kalau belum ada field peserta
-      type: 'Offline',
-    }))
-
-    console.log('Fetched Events:', upcomingEvents.value)
-  } catch (err) {
-    console.error('Error fetching events:', err)
+    const [dashRes, rentalRes] = await Promise.all([getDashboard(), getPenyewaan('Berjalan')])
+    summary.value = dashRes.data
+    activeRentals.value = (rentalRes.data || []).slice(0, 5)
+  } catch (e: any) {
+    displayNotification(e.response?.data?.message || 'Gagal memuat dashboard', 'error')
+  } finally {
+    loading.value = false
   }
 }
 
-onMounted(fetchEvents)
+const formatDateTime = (value: string) =>
+  value ? new Date(value).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'
 
-// ============================
-// Dummy lainnya (berita, galeri, dll)
-// ============================
-const recentNews = reactive([
-  {
-    id: 1,
-    title: 'Peluncuran Program Tamsar 2024',
-    category: 'Pengumuman',
-    date: '2024-11-10',
-    views: 245,
-    status: 'Published',
-  },
-  {
-    id: 2,
-    title: 'Workshop Teknologi Pendidikan',
-    category: 'Event',
-    date: '2024-11-09',
-    views: 189,
-    status: 'Published',
-  },
-  {
-    id: 3,
-    title: 'Pencapaian Siswa Berprestasi',
-    category: 'Berita',
-    date: '2024-11-08',
-    views: 312,
-    status: 'Published',
-  },
-  {
-    id: 4,
-    title: 'Kegiatan Ekstrakurikuler Semester Ini',
-    category: 'Kegiatan',
-    date: '2024-11-07',
-    views: 156,
-    status: 'Draft',
-  },
-  {
-    id: 5,
-    title: 'Penerimaan Siswa Baru 2025',
-    category: 'Pengumuman',
-    date: '2024-11-05',
-    views: 423,
-    status: 'Published',
-  },
-])
+const formatRupiah = (value: number) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`
 
-const galleryPhotos = reactive([
-  { id: 1, title: 'Upacara Bendera', likes: 45, icon: Image },
-  { id: 2, title: 'Kegiatan Olahraga', likes: 32, icon: Image },
-  { id: 3, title: 'Workshop Siswa', likes: 56, icon: Image },
-  { id: 4, title: 'Lomba Seni', likes: 78, icon: Image },
-])
-
-const recentActivities = reactive([
-  {
-    id: 1,
-    text: 'Admin menambahkan 5 foto baru ke galeri',
-    time: '5 menit lalu',
-    icon: Image,
-    color: 'bg-blue-500',
-  },
-  {
-    id: 2,
-    text: 'Berita "Workshop Teknologi" dipublikasikan',
-    time: '15 menit lalu',
-    icon: FileText,
-    color: 'bg-green-500',
-  },
-])
+onMounted(fetchData)
 </script>
-
-<style scoped>
-/* Custom styles jika diperlukan */
-</style>

@@ -11,7 +11,8 @@ const routes = [
     component: UserLayout,
     children: [
       { path: '', component: Home },
-      { path: 'tentang', component: () => import('../modules/UserArea/Tentang.vue') },
+      { path: 'tentang', component: Tentang },
+      { path: 'lokasi', component: () => import('../modules/UserArea/Lokasi.vue') },
     ],
   },
 

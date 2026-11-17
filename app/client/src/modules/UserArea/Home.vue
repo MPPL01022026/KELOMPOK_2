@@ -374,8 +374,12 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 
-// Gunakan variabel heroBg dan gallery yang sudah ada.
-// Jika sebelumnya didefinisikan di script lama, pertahankan definisinya.
+const heroBg = '/images/product/product-01.jpg'
+const gallery = [
+  '/images/product/product-01.jpg',
+  '/images/product/product-02.jpg',
+  '/images/product/product-03.jpg',
+]
 </script>
 
 

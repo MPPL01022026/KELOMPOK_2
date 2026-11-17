@@ -13,7 +13,10 @@ const authMiddleware = (req, res, next) => {
 
   try {
     // Verifikasi token
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const decoded = jwt.verify(
+      token,
+      process.env.SECRET_KEY || "hazza-bike-dev-secret"
+    );
 
     // Simpan data user ke req agar bisa dipakai di route
     req.user = decoded;
