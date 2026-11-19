@@ -9,22 +9,3 @@
     </div>
   </nav>
 </template>
-
-<script setup>
-import { RouterLink } from 'vue-router'
-</script>
-
-<style scoped>
-.navbar-link {
-  display: inline-block;
-  color: white !important;
-  font-weight: 700;
-  font-size: 1.25rem;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.navbar-link:hover {
-  color: #4b5563;
-}
-</style>

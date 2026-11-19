@@ -1,12 +1,8 @@
 <template>
   <div>
     <Navbar />
-    <div class="pt-20"> 
+    <div>
       <router-view />
     </div>
   </div>
 </template>
-
-<script setup>
-import Navbar from "./widgets/Navbar.vue";
-</script>
