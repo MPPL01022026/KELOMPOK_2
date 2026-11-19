@@ -21,7 +21,7 @@
               class="px-3 py-2 leading-tight border"
               :class="
                 currentPage === page
-                  ? 'text-white bg-[#1e3a8a] border-[#2b6443]'
+                  ? 'text-white bg-green-800 border-green-900'
                   : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'
               "
             >
@@ -48,14 +48,23 @@
   </tr>
 </template>
 
-<script setup>
-defineProps({
-  currentPage: Number,
-  totalPages: Number,
-  pages: Array,
-  totalColumns: Number,
-  totalRow: { type: Number, default: 0 },
-})
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    currentPage: number
+    totalPages: number
+    pages: number[]
+    totalColumns: number
+    totalRow?: number
+  }>(),
+  {
+    totalRow: 0,
+  },
+)
 
-defineEmits(['prev-page', 'next-page', 'page-now'])
+defineEmits<{
+  'prev-page': []
+  'next-page': []
+  'page-now': [page: number]
+}>()
 </script>

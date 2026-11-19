@@ -5,46 +5,22 @@
         <h2 class="text-lg font-bold text-slate-900">Data Pelanggan</h2>
         <p class="text-sm text-slate-500">Input dan lihat data pelanggan penyewaan.</p>
       </div>
-      <div class="flex gap-2">
-        <input
-          v-model="search"
-          @keyup.enter="fetchPelanggan"
-          placeholder="Cari nama, HP, atau identitas"
-          class="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
-        />
-        <BaseButton size="sm" @click="showForm = true">
-          <template #icon-left><Plus class="h-4 w-4" /></template>
-          Tambah Pelanggan
-        </BaseButton>
-      </div>
     </div>
 
-    <div class="overflow-hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <SkeletonTable v-if="loading" :columns="5" :rows="6" />
-      <table v-else class="min-w-full text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-4 py-3">ID</th>
-            <th class="px-4 py-3">Nama</th>
-            <th class="px-4 py-3">No HP</th>
-            <th class="px-4 py-3">Alamat</th>
-            <th class="px-4 py-3">No Identitas</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-if="pelanggan.length === 0">
-            <td colspan="5" class="px-4 py-10 text-center text-slate-500">Belum ada data pelanggan.</td>
-          </tr>
-          <tr v-for="p in pelanggan" :key="p.id_pelanggan" class="transition-colors hover:bg-slate-50">
-            <td class="px-4 py-3 font-semibold text-slate-900">{{ p.id_pelanggan }}</td>
-            <td class="px-4 py-3">{{ p.nama }}</td>
-            <td class="px-4 py-3">{{ p.no_hp || '-' }}</td>
-            <td class="px-4 py-3">{{ p.alamat || '-' }}</td>
-            <td class="px-4 py-3">{{ p.no_identitas || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <BaseTable
+      :columns="columns"
+      :data="paginatedPelanggan"
+      :loading="loading"
+      row-key="id_pelanggan"
+      search-placeholder="Cari nama, HP, atau identitas"
+      :show-actions="false"
+      add-label="Tambah Pelanggan"
+      :pagination="pagination"
+      @add="showForm = true"
+      @search="fetchPelanggan"
+      @page-change="setPage"
+    >
+    </BaseTable>
 
     <Transition name="modal">
       <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
@@ -87,16 +63,24 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Plus } from 'lucide-vue-next'
 import BaseButton from '@/components/Button/BaseButton.vue'
+import BaseTable, { type TableColumn } from '@/components/Table/BaseTable.vue'
 import Notification from '@/components/Modal/Notification.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import { useClientPagination } from '@/composables/useClientPagination'
 import { useNotification } from '@/composables/useNotification'
 import { createPelanggan, getPelanggan } from '@/service/hazza'
+
 
 const pelanggan = ref<any[]>([])
 const loading = ref(false)
 const search = ref('')
+const columns: TableColumn[] = [
+  { key: 'nama', label: 'Nama' },
+  { key: 'no_hp', label: 'No HP' },
+  { key: 'alamat', label: 'Alamat' },
+  { key: 'no_identitas', label: 'No Identitas' },
+]
+const { pagination, paginatedData: paginatedPelanggan, setPage } = useClientPagination(pelanggan)
 const showForm = ref(false)
 const form = ref({ nama: '', no_hp: '', alamat: '', no_identitas: '' })
 
@@ -108,10 +92,11 @@ const {
   hideNotification,
 } = useNotification()
 
-const fetchPelanggan = async () => {
+const fetchPelanggan = async (query = search.value) => {
+  search.value = query
   loading.value = true
   try {
-    const res = await getPelanggan({ search: search.value || undefined })
+    const res = await getPelanggan({ search: query || undefined })
     pelanggan.value = res.data || []
   } catch (e: any) {
     displayNotification(e.response?.data?.message || 'Gagal memuat data pelanggan', 'error')

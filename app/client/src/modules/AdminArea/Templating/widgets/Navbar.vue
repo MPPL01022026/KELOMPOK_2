@@ -26,19 +26,32 @@
           </div>
         </div>
         <button
-          @click="logout"
+          @click="showLogoutConfirmation = true"
           class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
         >
           Keluar
         </button>
       </div>
     </div>
+
+    <Confirmation
+      :show-confirm-dialog="showLogoutConfirmation"
+      confirm-title="Konfirmasi Keluar"
+      confirm-message="Apakah Anda yakin ingin keluar dari akun admin?"
+    >
+      <BaseButton variant="secondary" size="sm" @click="showLogoutConfirmation = false">
+        Batal
+      </BaseButton>
+      <BaseButton variant="danger" size="sm" @click="logout">Keluar</BaseButton>
+    </Confirmation>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import Confirmation from '@/components/Modal/Confirmation.vue'
 
 defineProps<{
   sidebarOpen: boolean
@@ -50,6 +63,7 @@ defineEmits<{
 }>()
 
 const router = useRouter()
+const showLogoutConfirmation = ref(false)
 
 const adminName = computed(() => {
   const raw = localStorage.getItem('user')
@@ -76,6 +90,7 @@ const getPageTitle = (page: string): string => {
 }
 
 const logout = () => {
+  showLogoutConfirmation.value = false
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   router.push('/login')

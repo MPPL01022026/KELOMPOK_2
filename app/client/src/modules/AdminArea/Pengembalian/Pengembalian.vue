@@ -5,34 +5,35 @@
       <p class="text-sm text-slate-500">Pilih kondisi sepeda saat dikembalikan.</p>
     </div>
 
-    <div class="overflow-hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <SkeletonTable v-if="loading" :columns="5" :rows="5" />
-      <table v-else class="min-w-full text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-4 py-3">ID</th>
-            <th class="px-4 py-3">Sepeda</th>
-            <th class="px-4 py-3">Pelanggan</th>
-            <th class="px-4 py-3">Batas Waktu</th>
-            <th class="px-4 py-3">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-if="activeRentals.length === 0">
-            <td colspan="5" class="px-4 py-10 text-center text-slate-500">Tidak ada sewa yang perlu dikembalikan.</td>
-          </tr>
-          <tr v-for="r in activeRentals" :key="r.id_penyewaan" class="transition-colors hover:bg-slate-50">
-            <td class="px-4 py-3 font-semibold text-slate-900">{{ r.id_penyewaan }}</td>
-            <td class="px-4 py-3">{{ r.sepeda?.nama_sepeda }} ({{ r.sepeda?.id_sepeda }})</td>
-            <td class="px-4 py-3">{{ r.pelanggan?.nama }}</td>
-            <td class="px-4 py-3">{{ formatDateTime(r.batas_waktu) }}</td>
-            <td class="px-4 py-3">
-              <BaseButton size="sm" @click="openReturn(r)">Kembalikan</BaseButton>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <BaseTable
+      :columns="columns"
+      :data="paginatedRentals"
+      :loading="loading"
+      row-key="id_penyewaan"
+      :show-add="false"
+      :show-edit="false"
+      :show-delete="false"
+      :show-search="false"
+      :pagination="pagination"
+      @page-change="setPage"
+    >
+      <template #cell-sepeda="{ row }">
+        {{ row.sepeda?.nama_sepeda || '-' }}
+      </template>
+      <template #cell-pelanggan="{ row }">{{ row.pelanggan?.nama }}</template>
+      <template #cell-batas_waktu="{ value }">{{ formatDateTime(value) }}</template>
+      <template #row-actions="{ row }">
+        <button
+          type="button"
+          @click="openReturn(row)"
+          class="action-icon"
+          title="Catat pengembalian"
+          :aria-label="`Catat pengembalian transaksi ${row.id_penyewaan}`"
+        >
+          <CornerDownLeft class="h-4 w-4" />
+        </button>
+      </template>
+    </BaseTable>
 
     <Transition name="modal">
       <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
@@ -42,9 +43,12 @@
           <form @submit.prevent="submitReturn" class="mt-4 space-y-4">
             <div>
               <label class="mb-1.5 block text-sm font-medium text-slate-700">Kondisi Kembali</label>
-              <select v-model="form.kondisi_kembali" class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm">
-                <option v-for="k in kondisiOptions" :key="k" :value="k">{{ k }}</option>
-              </select>
+              <div class="relative">
+                <select v-model="form.kondisi_kembali" class="admin-select">
+                  <option v-for="k in kondisiOptions" :key="k" :value="k">{{ k }}</option>
+                </select>
+                <ChevronDown class="admin-select-icon" />
+              </div>
             </div>
             <div>
               <label class="mb-1.5 block text-sm font-medium text-slate-700">Catatan</label>
@@ -70,14 +74,22 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { ChevronDown, CornerDownLeft } from 'lucide-vue-next'
 import BaseButton from '@/components/Button/BaseButton.vue'
+import BaseTable, { type TableColumn } from '@/components/Table/BaseTable.vue'
 import Notification from '@/components/Modal/Notification.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import { useClientPagination } from '@/composables/useClientPagination'
 import { useNotification } from '@/composables/useNotification'
 import { createPengembalian, getPenyewaan } from '@/service/hazza'
 
 const activeRentals = ref<any[]>([])
 const loading = ref(false)
+const columns: TableColumn[] = [
+  { key: 'sepeda', label: 'Sepeda' },
+  { key: 'pelanggan', label: 'Pelanggan' },
+  { key: 'batas_waktu', label: 'Batas Waktu' },
+]
+const { pagination, paginatedData: paginatedRentals, setPage } = useClientPagination(activeRentals)
 const showForm = ref(false)
 const selected = ref<any | null>(null)
 const kondisiOptions = ['Baik', 'Perlu Perawatan', 'Rusak']
@@ -125,3 +137,66 @@ const formatDateTime = (value: string) =>
 
 onMounted(fetchData)
 </script>
+
+<style scoped>
+.admin-select {
+  appearance: none;
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background-color: #f8fafc;
+  padding: 0 2.5rem 0 0.875rem;
+  color: #334155;
+  font-size: 0.875rem;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
+}
+
+.admin-select:hover {
+  border-color: #a7f3d0;
+  background-color: #fff;
+}
+
+.admin-select:focus {
+  border-color: #10b981;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 0.12);
+}
+
+.admin-select-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.875rem;
+  width: 1rem;
+  height: 1rem;
+  color: #94a3b8;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.action-icon {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: #059669;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    transform 0.15s;
+}
+
+.action-icon:hover {
+  transform: translateY(-1px);
+  background: #ecfdf5;
+  color: #047857;
+}
+</style>

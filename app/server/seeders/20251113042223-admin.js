@@ -5,6 +5,12 @@ const bcrypt = require("bcryptjs");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const existingAdmins = await queryInterface.sequelize.query(
+      "SELECT id FROM admins WHERE username = 'admin' LIMIT 1",
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    if (existingAdmins.length > 0) return;
+
     const hashedPasswordAdmin = await bcrypt.hash("admin", 10);
 
     await queryInterface.bulkInsert(

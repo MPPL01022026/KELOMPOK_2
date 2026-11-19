@@ -5,75 +5,67 @@
         <h2 class="text-lg font-bold text-slate-900">Daftar Sepeda</h2>
         <p class="text-sm text-slate-500">Kelola armada sepeda Hazza Bike.</p>
       </div>
-      <div class="flex gap-2">
-        <input
-          v-model="search"
-          @keyup.enter="fetchBikes"
-          placeholder="Cari ID, nama, atau jenis"
-          class="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
-        />
-        <BaseButton size="sm" @click="openAdd">
-          <template #icon-left><Plus class="h-4 w-4" /></template>
-          Tambah Sepeda
-        </BaseButton>
-      </div>
     </div>
 
-    <div class="overflow-hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <SkeletonTable v-if="loading" :columns="6" :rows="6" />
-      <table v-else class="min-w-full text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-4 py-3">ID</th>
-            <th class="px-4 py-3">Nama Sepeda</th>
-            <th class="px-4 py-3">Jenis</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Kondisi</th>
-            <th class="px-4 py-3">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-if="bikes.length === 0">
-            <td colspan="6" class="px-4 py-10 text-center text-slate-500">Belum ada data sepeda.</td>
-          </tr>
-          <tr v-for="bike in bikes" :key="bike.id_sepeda" class="transition-colors hover:bg-slate-50">
-            <td class="px-4 py-3 font-semibold text-slate-900">{{ bike.id_sepeda }}</td>
-            <td class="px-4 py-3">{{ bike.nama_sepeda }}</td>
-            <td class="px-4 py-3">{{ bike.jenis || '-' }}</td>
-            <td class="px-4 py-3">
-              <select
-                :value="bike.status"
-                @change="changeStatus(bike, $event)"
-                class="rounded-xl border border-slate-200 bg-white px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-              >
-                <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </td>
-            <td class="px-4 py-3">
-              <select
-                :value="bike.kondisi"
-                @change="changeKondisi(bike, $event)"
-                class="rounded-xl border border-slate-200 bg-white px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-              >
-                <option v-for="k in kondisiOptions" :key="k" :value="k">{{ k }}</option>
-              </select>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex gap-2">
-                <BaseButton variant="secondary" size="sm" @click="openEdit(bike)">
-                  <template #icon-left><Pencil class="h-4 w-4" /></template>
-                  Edit
-                </BaseButton>
-                <BaseButton variant="danger" size="sm" @click="remove(bike)">
-                  <template #icon-left><Trash2 class="h-4 w-4" /></template>
-                  Hapus
-                </BaseButton>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <BaseTable
+      :columns="columns"
+      :data="paginatedBikes"
+      :loading="loading"
+      row-key="id_sepeda"
+      add-label="Tambah Sepeda"
+      search-placeholder="Cari nama atau jenis sepeda"
+      :pagination="pagination"
+      @add="openAdd"
+      @search="fetchBikes"
+      @page-change="setPage"
+    >
+      <template #cell-status="{ row }">
+        <div class="relative w-40">
+          <select
+            :value="row.status"
+            :aria-label="`Status sepeda ${row.id_sepeda}`"
+            @change="changeStatus(row, $event)"
+            class="admin-select"
+          >
+            <option v-for="status in statusOptions" :key="status" :value="status">{{ status }}</option>
+          </select>
+          <ChevronDown class="admin-select-icon" />
+        </div>
+      </template>
+      <template #cell-kondisi="{ row }">
+        <div class="relative w-44">
+          <select
+            :value="row.kondisi"
+            :aria-label="`Kondisi sepeda ${row.id_sepeda}`"
+            @change="changeKondisi(row, $event)"
+            class="admin-select"
+          >
+            <option v-for="kondisi in kondisiOptions" :key="kondisi" :value="kondisi">{{ kondisi }}</option>
+          </select>
+          <ChevronDown class="admin-select-icon" />
+        </div>
+      </template>
+      <template #row-actions="{ row }">
+        <button
+          type="button"
+          @click="openEdit(row)"
+          class="action-icon action-icon-edit"
+          title="Edit sepeda"
+          :aria-label="`Edit sepeda ${row.id_sepeda}`"
+        >
+          <Pencil class="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          @click="remove(row)"
+          class="action-icon action-icon-delete"
+          title="Hapus sepeda"
+          :aria-label="`Hapus sepeda ${row.id_sepeda}`"
+        >
+          <Trash2 class="h-4 w-4" />
+        </button>
+      </template>
+    </BaseTable>
 
     <Transition name="modal">
       <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
@@ -130,12 +122,13 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Pencil, Plus, Trash2 } from 'lucide-vue-next'
+import { ChevronDown, Pencil, Trash2 } from 'lucide-vue-next'
 import BaseButton from '@/components/Button/BaseButton.vue'
+import BaseTable, { type TableColumn } from '@/components/Table/BaseTable.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
 import Notification from '@/components/Modal/Notification.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import { useConfirmation } from '@/composables/useConfirmation'
+import { useClientPagination } from '@/composables/useClientPagination'
 import { useNotification } from '@/composables/useNotification'
 import {
   createSepeda,
@@ -149,6 +142,13 @@ import {
 const bikes = ref<any[]>([])
 const loading = ref(false)
 const search = ref('')
+const columns: TableColumn[] = [
+  { key: 'nama_sepeda', label: 'Nama Sepeda' },
+  { key: 'jenis', label: 'Jenis' },
+  { key: 'status', label: 'Status' },
+  { key: 'kondisi', label: 'Kondisi' },
+]
+const { pagination, paginatedData: paginatedBikes, setPage } = useClientPagination(bikes)
 const showForm = ref(false)
 const editing = ref<any | null>(null)
 const form = ref({ id_sepeda: '', nama_sepeda: '', jenis: '' })
@@ -172,10 +172,11 @@ const {
   cancel,
 } = useConfirmation()
 
-const fetchBikes = async () => {
+const fetchBikes = async (query = search.value) => {
+  search.value = query
   loading.value = true
   try {
-    const res = await getSepeda({ search: search.value || undefined })
+    const res = await getSepeda({ search: query || undefined })
     bikes.value = res.data || []
   } catch (e: any) {
     displayNotification(e.response?.data?.message || 'Gagal memuat data sepeda', 'error')
@@ -267,3 +268,73 @@ const changeKondisi = async (bike: any, event: Event) => {
 
 onMounted(fetchBikes)
 </script>
+
+<style scoped>
+.admin-select {
+  appearance: none;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background-color: #fff;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
+}
+
+.admin-select:hover {
+  border-color: #a7f3d0;
+  background-color: #fafffd;
+}
+
+.admin-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 0.12);
+}
+
+.admin-select-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  width: 1rem;
+  height: 1rem;
+  color: #94a3b8;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.action-icon {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: #64748b;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    transform 0.15s;
+}
+
+.action-icon:hover {
+  transform: translateY(-1px);
+}
+
+.action-icon-edit:hover {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.action-icon-delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+</style>
